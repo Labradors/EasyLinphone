@@ -43,6 +43,11 @@ public class LinphoneUtils {
         mLinphoneCore = LinphoneManager.getLc();
         mLinphoneCore.enableEchoCancellation(true);
         mLinphoneCore.enableEchoLimiter(true);
+        LinphoneCore.Transports transports = mLinphoneCore.getSignalingTransportPorts();
+        transports.udp = -1;
+        transports.tls = -1;
+        transports.tcp = 5060;
+        mLinphoneCore.setSignalingTransportPorts(transports);
     }
 
     /**
