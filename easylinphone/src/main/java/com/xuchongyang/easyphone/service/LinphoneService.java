@@ -53,6 +53,14 @@ public class LinphoneService extends Service implements LinphoneCoreListener {
         return instance != null;
     }
 
+    public static PhoneCallback getsPhoneCallback() {
+        return sPhoneCallback;
+    }
+
+    public static RegistrationCallback getsRegistrationCallback() {
+        return sRegistrationCallback;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();

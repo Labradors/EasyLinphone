@@ -3,6 +3,8 @@ package com.xuchongyang.easyphone.linphone;
 import android.content.Context;
 import android.util.Log;
 
+import com.xuchongyang.easyphone.service.LinphoneService;
+
 import org.linphone.core.LinphoneAddress;
 import org.linphone.core.LinphoneAuthInfo;
 import org.linphone.core.LinphoneCall;
@@ -12,6 +14,9 @@ import org.linphone.core.LinphoneCoreException;
 import org.linphone.core.LinphoneCoreFactory;
 import org.linphone.core.LinphoneProxyConfig;
 import org.linphone.core.LpConfig;
+import org.linphone.core.PresenceActivityType;
+import org.linphone.core.PresenceBasicStatus;
+import org.linphone.core.PresenceModel;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -52,6 +57,7 @@ public class LinphoneUtils {
 
     /**
      * 注册到服务器
+     *
      * @param name
      * @param password
      * @param host
@@ -121,6 +127,7 @@ public class LinphoneUtils {
 
     /**
      * 是否静音
+     *
      * @param isMicMuted
      */
     public void toggleMicro(boolean isMicMuted) {
@@ -129,11 +136,12 @@ public class LinphoneUtils {
 
     /**
      * 是否外放
+     *
      * @param isSpeakerEnabled
      */
-     public void toggleSpeaker(boolean isSpeakerEnabled) {
-         mLinphoneCore.enableSpeaker(isSpeakerEnabled);
-     }
+    public void toggleSpeaker(boolean isSpeakerEnabled) {
+        mLinphoneCore.enableSpeaker(isSpeakerEnabled);
+    }
 
     public static void copyIfNotExist(Context context, int resourceId, String target) throws IOException {
         File fileToCopy = new File(target);
@@ -182,5 +190,43 @@ public class LinphoneUtils {
             return null;
         }
         return LinphoneManager.getLcIfManagerNotDestroyOrNull();
+    }
+
+    public static void changeStatusToOnThePhone() {
+        LinphoneCore lc = LinphoneManager.getLcIfManagerNotDestroyOrNull();
+        if (LinphoneManager.isInstanceiated() && isPresenceModelActivitySet() && lc.getPresenceModel().getActivity().getType() != PresenceActivityType.OnThePhone) {
+            lc.getPresenceModel().getActivity().setType(PresenceActivityType.OnThePhone);
+        } else if (LinphoneManager.isInstanceiated() && !isPresenceModelActivitySet()) {
+            PresenceModel model = LinphoneCoreFactory.instance().createPresenceModel(PresenceActivityType.OnThePhone, null);
+            lc.setPresenceModel(model);
+        }
+    }
+
+    public static void changeStatusToOffline() {
+        LinphoneCore lc = LinphoneManager.getLcIfManagerNotDestroyOrNull();
+        if (LinphoneManager.isInstanceiated() && lc != null) {
+            lc.getPresenceModel().setBasicStatus(PresenceBasicStatus.Closed);
+        }
+    }
+
+    private static boolean isPresenceModelActivitySet() {
+        LinphoneCore lc = LinphoneManager.getLcIfManagerNotDestroyOrNull();
+        if (LinphoneManager.isInstanceiated() && lc != null) {
+            return lc.getPresenceModel() != null && lc.getPresenceModel().getActivity() != null;
+        }
+        return false;
+    }
+
+    public static void changeStatusToOnline() {
+        if (LinphoneService.isReady()) {
+            LinphoneCore lc = LinphoneManager.getLcIfManagerNotDestroyOrNull();
+            if (LinphoneManager.isInstanceiated() && lc != null && isPresenceModelActivitySet() &&
+                    lc.getPresenceModel().getActivity().getType() != PresenceActivityType.TV) {
+                lc.getPresenceModel().getActivity().setType(PresenceActivityType.TV);
+            } else if (LinphoneManager.isInstanceiated() && lc != null && !isPresenceModelActivitySet()) {
+                PresenceModel model = LinphoneCoreFactory.instance().createPresenceModel(PresenceActivityType.TV, null);
+                lc.setPresenceModel(model);
+            }
+        }
     }
 }
